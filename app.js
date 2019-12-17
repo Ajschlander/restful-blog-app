@@ -6,7 +6,7 @@ const   express             = require("express"),
         mongoose            = require("mongoose"),
         PORT                = process.env.PORT || 3000;
 
-mongoose.connect("mongodb://localhost/restful_blog_app", {
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/restful_blog_app", {
     useUnifiedTopology: true,
     useNewUrlParser: true,
     useFindAndModify: false
