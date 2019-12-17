@@ -20,14 +20,38 @@ const blogSchema = new mongoose.Schema({
 });
 const Blog = mongoose.model("Blog", blogSchema);
 
-Blog.create({
-    title: "Test Blog",
-    image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1350&q=80",
-    body: "HELLO THIS IS A BLOG POST!"
+// REROUTE TO /BLOGS
+app.get("/", (req, res) => {
+    res.redirect("/blogs");
 });
 
-app.get("/", (req, res) => {
-    res.send("This is the home route");
+// INDEX ROUTE
+app.get("/blogs", (req, res) => {
+    Blog.find({}, function(err, blogs){
+        if(err) console.log(err);
+        res.render("index", {blogs: blogs});
+    });
+});
+
+// NEW ROUTE
+app.get("/blogs/new", (req, res) => {
+    res.render("new");
+});
+
+// CREATE ROUTE
+app.post("/blogs", (req, res) => {
+    Blog.create(req.body.blog, function(err, newBlog){
+        if(err) res.render("new");
+        res.redirect("/blogs");
+    });
+});
+
+// SHOW ROUTE
+app.get("/blogs/:id", (req, res) => {
+    Blog.findById(req.params.id, function(err, foundBlog){
+        if(err) res.redirect("/blogs");
+        res.render("show", {blog: foundBlog});
+    });
 });
 
 app.listen(PORT, () => {
