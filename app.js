@@ -1,9 +1,10 @@
-const   express         = require("express"),
-        app             = express(),
-        methodOverride  = require("method-override"),
-        bodyParser      = require("body-parser"),
-        mongoose        = require("mongoose"),
-        PORT            = process.env.PORT || 3000;
+const   express             = require("express"),
+        app                 = express(),
+        methodOverride      = require("method-override"),
+        expressSanitizer    = require("express-sanitizer"),
+        bodyParser          = require("body-parser"),
+        mongoose            = require("mongoose"),
+        PORT                = process.env.PORT || 3000;
 
 mongoose.connect("mongodb://127.0.0.1:27017/restful_blog_app", {
     useUnifiedTopology: true,
@@ -14,6 +15,7 @@ mongoose.connect("mongodb://127.0.0.1:27017/restful_blog_app", {
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(expressSanitizer());
 app.use(methodOverride("_method"));
 
 const blogSchema = new mongoose.Schema({
@@ -44,6 +46,7 @@ app.get("/blogs/new", (req, res) => {
 
 // CREATE ROUTE
 app.post("/blogs", (req, res) => {
+    req.body.blog.body = req.sanitize(req.body.blog.body);
     Blog.create(req.body.blog, function(err, newBlog){
         if(err) res.render("new");
         res.redirect("/blogs");
@@ -68,6 +71,7 @@ app.get("/blogs/:id/edit", (req, res) => {
 
 // UPDATE ROUTE
 app.put("/blogs/:id", (req, res) => {
+    req.body.blog.body = req.sanitize(req.body.blog.body);
     Blog.findByIdAndUpdate(req.params.id, req.body.blog, function(err, updatedBlog){
         if(err) res.redirect("/blogs");
         res.redirect("/blogs/" + req.params.id);
@@ -83,5 +87,5 @@ app.delete("/blogs/:id", (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log("Server is running...");
+    console.log("Server is running on port: " + PORT + "...");
 })
